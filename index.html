@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>구글 지도 화면 고정 나침반</title>
     <style>
-        html, body, #map {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
+        html,
+        body,
+        #map {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             position: relative;
         }
-        
+
         /* 화면 중앙에 나침반 이미지 고정 */
         #compass-container {
             position: absolute;
@@ -17,33 +22,38 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
-            pointer-events: none; /* 나침반 아래의 지도를 조작할 수 있도록 설정 */
+            pointer-events: none;
+            /* 나침반 아래의 지도를 조작할 수 있도록 설정 */
             transition: transform 0.1s ease-out;
             /* 부모 컨테이너의 크기를 화면 전체(100%)로 넓혀 기준을 잡아줍니다 */
             width: 100%;
             height: 100%;
-               
+
             /* 내부 이미지를 정중앙에 정렬하기 위한 설정 */
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         /* 나침반 이미지 크기 제어 */
-        #compass-image { 
+        #compass-image {
             /* 화면 세로 크기(vh)의 70% 수준으로 채우기 (원하는 크기에 따라 숫자 조절 가능) */
-            width: 60vh;    
-            height: 60vh;             
-            object-fit: contain; /* 이미지 비율 유지 */
+            width: 60vh;
+            height: 60vh;
+            object-fit: contain;
+            /* 이미지 비율 유지 */
         }
+
         /* 📱 모바일 기준 설정 (화면 너비가 768px 이하일 때 적용) */
         @media (max-width: 768px) {
             #compass-image {
                 /* 모바일에서는 세로(vh)가 아닌 화면 가로 너비(vw)의 75% 수준으로 맞춥니다 */
                 width: 75vw;
                 height: 75vw;
-                max-width: 350px; /* 아무리 화면이 커져도 모바일에서 350px은 넘지 않도록 제한 */
+                max-width: 350px;
+                /* 아무리 화면이 커져도 모바일에서 350px은 넘지 않도록 제한 */
             }
-            
+
             /* 혹시 왼쪽 상단 버튼 패널도 모바일에서 너무 크다면 크기를 약간 줄여줍니다 */
             #control-panel {
                 top: 10px;
@@ -51,11 +61,13 @@
                 padding: 8px;
                 gap: 6px;
             }
+
             .btn {
                 padding: 4px 8px;
                 font-size: 11px;
             }
         }
+
         /* 왼쪽 상단 컨트롤 바 스타일 */
         #control-panel {
             position: absolute;
@@ -65,17 +77,19 @@
             background: rgba(255, 255, 255, 0.9);
             padding: 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
+
         .control-group {
             display: flex;
             align-items: center;
             gap: 8px;
         }
+
         .btn {
             padding: 6px 12px;
             background-color: #fff;
@@ -84,7 +98,11 @@
             cursor: pointer;
             font-size: 13px;
         }
-        .btn:hover { background-color: #f0f0f0; }
+
+        .btn:hover {
+            background-color: #f0f0f0;
+        }
+
         .btn.active {
             background-color: #4285F4;
             color: #fff;
@@ -92,6 +110,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div id="map"></div>
@@ -115,6 +134,10 @@
     <script>
         let isCompassVisible = true;
 
+        // 1. 누적 연산을 위해 함수 바깥에 전역 변수로 선언해야 값이 유지됩니다.
+        let lastHeading = 0;
+        let accumulatedRotation = 0;
+
         function startCompassMap() {
             try {
                 const map = new google.maps.Map(document.getElementById("map"), {
@@ -124,24 +147,25 @@
                     tilt: 0,
                     mapId: "c4dd249fc63589dbebea6272" // 발급받은 벡터 전용 Map ID 입력
                 });
-                
 
                 const compassContainer = document.getElementById("compass-container");
 
                 map.addListener("heading_changed", () => {
-                    const heading = map.getHeading() || 0;
+                    // 변수명을 currentHeading으로 통일하여 아래 계산식과 매칭합니다.
+                    const currentHeading = map.getHeading() || 0;
                     let diff = currentHeading - lastHeading;
-                        
+
                     if (diff > 180) {
                         diff -= 360;
                     } else if (diff < -180) {
                         diff += 360;
                     }
-                    // 1. 지도의 움직임 그대로 플러스(+) 누적 계산
-                    accumulatedRotation += diff; 
+
+                    // 지도의 움직임 그대로 플러스(+) 누적 계산
+                    accumulatedRotation += diff;
                     lastHeading = currentHeading;
 
-                    // 2. 최종 출력할 때만 음수(-)를 적용하여 회전 방향 일치 (말씀하신 정석 구조)
+                    // 최종 출력할 때만 음수(-)를 적용하여 회전 방향 일치
                     compassContainer.style.transform = `translate(-50%, -50%) rotate(${-accumulatedRotation}deg)`;
                 });
             } catch (error) {
@@ -153,9 +177,9 @@
         function toggleCompass() {
             const container = document.getElementById("compass-container");
             const btn = document.getElementById("btn-toggle");
-            
+
             isCompassVisible = !isCompassVisible;
-            
+
             if (isCompassVisible) {
                 container.style.display = "flex";
                 btn.innerText = "ON";
@@ -185,6 +209,9 @@
         }
     </script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC65x514y9qD8MdeG4T7B4HDHkxx3W2xpI&callback=startCompassMap&loading=async" async defer></script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC65x514y9qD8MdeG4T7B4HDHkxx3W2xpI&callback=startCompassMap&loading=async"
+        async defer></script>
 </body>
+
 </html>
