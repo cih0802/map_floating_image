@@ -130,7 +130,19 @@
 
                 map.addListener("heading_changed", () => {
                     const heading = map.getHeading() || 0;
-                    compassContainer.style.transform = `translate(-50%, -50%) rotate(${-heading}deg)`;
+                    let diff = currentHeading - lastHeading;
+                        
+                    if (diff > 180) {
+                        diff -= 360;
+                    } else if (diff < -180) {
+                        diff += 360;
+                    }
+                    // 1. 지도의 움직임 그대로 플러스(+) 누적 계산
+                    accumulatedRotation += diff; 
+                    lastHeading = currentHeading;
+
+                    // 2. 최종 출력할 때만 음수(-)를 적용하여 회전 방향 일치 (말씀하신 정석 구조)
+                    compassContainer.style.transform = `translate(-50%, -50%) rotate(${-accumulatedRotation}deg)`;
                 });
             } catch (error) {
                 console.error("지도를 초기화하는 중 오류 발생:", error);
