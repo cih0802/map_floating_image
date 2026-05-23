@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>구글 지도 화면 고정 나침반</title>
+    <style>
+        html, body, #map {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            position: relative;
+        }
+        
+        /* 화면 중앙에 나침반 이미지 고정 */
+        #compass-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none; /* 나침반 아래의 지도를 조작할 수 있도록 설정 */
+            transition: transform 0.1s ease-out;
+            display: block; /* 초기 상태: 보임 */
+        }
+        #compass-image { width: 80%; height: 80%; }
+
+        /* 왼쪽 상단 컨트롤 바 스타일 */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn {
+            padding: 6px 12px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn:hover { background-color: #f0f0f0; }
+        .btn.active {
+            background-color: #4285F4;
+            color: #fff;
+            border-color: #4285F4;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div id="control-panel">
+        <div class="control-group">
+            <span style="font-size: 13px; font-weight: bold;">나침반:</span>
+            <button id="btn-toggle" class="btn active" onclick="toggleCompass()">ON</button>
+        </div>
+        <div class="control-group">
+            <button id="btn-img-a" class="btn active" onclick="changeImage('A', './12animal_red.png')">이미지 A</button>
+            <button id="btn-img-b" class="btn" onclick="changeImage('B', './Luopan_reverse.png')">이미지 B</button>
+            <button id="btn-img-c" class="btn" onclick="changeImage('C', './Luopan.png')">이미지 C</button>
+        </div>
+    </div>
+
+    <div id="compass-container">
+        <img id="compass-image" src="./12animal_red.png" alt="Compass">
+    </div>
+
+    <script>
+        let isCompassVisible = true;
+
+        function startCompassMap() {
+            try {
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 37.5665, lng: 126.9780 },
+                    zoom: 16,
+                    heading: 0,
+                    tilt: 0,
+                    mapId: "c4dd249fc63589dbebea6272" // 발급받은 벡터 전용 Map ID 입력
+                });
+                
+
+                const compassContainer = document.getElementById("compass-container");
+
+                map.addListener("heading_changed", () => {
+                    const heading = map.getHeading() || 0;
+                    compassContainer.style.transform = `translate(-50%, -50%) rotate(${heading}deg)`;
+                });
+            } catch (error) {
+                console.error("지도를 초기화하는 중 오류 발생:", error);
+            }
+        }
+
+        // 나침반 표시/숨김 토글 함수
+        function toggleCompass() {
+            const container = document.getElementById("compass-container");
+            const btn = document.getElementById("btn-toggle");
+            
+            isCompassVisible = !isCompassVisible;
+            
+            if (isCompassVisible) {
+                container.style.display = "block";
+                btn.innerText = "ON";
+                btn.classList.add("active");
+            } else {
+                container.style.display = "none";
+                btn.innerText = "OFF";
+                btn.classList.remove("active");
+            }
+        }
+
+        // 나침반 이미지 변경 함수
+        function changeImage(type, imagePath) {
+            const imgElement = document.getElementById("compass-image");
+            imgElement.src = imagePath;
+
+            // 버튼 활성화 스타일 시각화 처리
+            const buttons = ['A', 'B', 'C'];
+            buttons.forEach(b => {
+                const targetBtn = document.getElementById(`btn-img-${b.toLowerCase()}`);
+                if (b === type) {
+                    targetBtn.classList.add("active");
+                } else {
+                    targetBtn.classList.remove("active");
+                }
+            });
+        }
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC65x514y9qD8MdeG4T7B4HDHkxx3W2xpI&callback=startCompassMap&loading=async" async defer></script>
+</body>
+</html>
