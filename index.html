@@ -31,11 +31,31 @@
         /* 나침반 이미지 크기 제어 */
         #compass-image { 
             /* 화면 세로 크기(vh)의 70% 수준으로 채우기 (원하는 크기에 따라 숫자 조절 가능) */
-            width: 70vh;    
-            height: 70vh;             
+            width: 60vh;    
+            height: 60vh;             
             object-fit: contain; /* 이미지 비율 유지 */
         }
-
+        /* 📱 모바일 기준 설정 (화면 너비가 768px 이하일 때 적용) */
+        @media (max-width: 768px) {
+            #compass-image {
+                /* 모바일에서는 세로(vh)가 아닌 화면 가로 너비(vw)의 75% 수준으로 맞춥니다 */
+                width: 75vw;
+                height: 75vw;
+                max-width: 350px; /* 아무리 화면이 커져도 모바일에서 350px은 넘지 않도록 제한 */
+            }
+            
+            /* 혹시 왼쪽 상단 버튼 패널도 모바일에서 너무 크다면 크기를 약간 줄여줍니다 */
+            #control-panel {
+                top: 10px;
+                left: 10px;
+                padding: 8px;
+                gap: 6px;
+            }
+            .btn {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
         /* 왼쪽 상단 컨트롤 바 스타일 */
         #control-panel {
             position: absolute;
