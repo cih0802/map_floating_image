@@ -130,7 +130,7 @@
 
                 map.addListener("heading_changed", () => {
                     const heading = map.getHeading() || 0;
-                    compassContainer.style.transform = `translate(-50%, -50%) rotate(${heading}deg)`;
+                    compassContainer.style.transform = `translate(-50%, -50%) rotate(${-heading}deg)`;
                 });
             } catch (error) {
                 console.error("지도를 초기화하는 중 오류 발생:", error);
@@ -145,7 +145,7 @@
             isCompassVisible = !isCompassVisible;
             
             if (isCompassVisible) {
-                container.style.display = "block";
+                container.style.display = "flex";
                 btn.innerText = "ON";
                 btn.classList.add("active");
             } else {
