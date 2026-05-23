@@ -19,9 +19,22 @@
             z-index: 10;
             pointer-events: none; /* 나침반 아래의 지도를 조작할 수 있도록 설정 */
             transition: transform 0.1s ease-out;
-            display: block; /* 초기 상태: 보임 */
+            /* 부모 컨테이너의 크기를 화면 전체(100%)로 넓혀 기준을 잡아줍니다 */
+            width: 100%;
+            height: 100%;
+               
+            /* 내부 이미지를 정중앙에 정렬하기 위한 설정 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #compass-image { width: 80%; height: 80%; }
+        /* 나침반 이미지 크기 제어 */
+        #compass-image { 
+            /* 화면 세로 크기(vh)의 70% 수준으로 채우기 (원하는 크기에 따라 숫자 조절 가능) */
+            width: 70vh;    
+            height: 70vh;             
+            object-fit: contain; /* 이미지 비율 유지 */
+        }
 
         /* 왼쪽 상단 컨트롤 바 스타일 */
         #control-panel {
