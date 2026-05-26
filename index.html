@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>구글 지도 화면 고정 나침반</title>
     <style>
         html,
@@ -15,46 +16,33 @@
             position: relative;
         }
 
-        /* 화면 중앙에 나침반 이미지 고정 */
         #compass-container {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
             z-index: 10;
             pointer-events: none;
-            /* 나침반 아래의 지도를 조작할 수 있도록 설정 */
-            transition: transform 0.1s ease-out;
-            /* 부모 컨테이너의 크기를 화면 전체(100%)로 넓혀 기준을 잡아줍니다 */
             width: 100%;
             height: 100%;
-
-            /* 내부 이미지를 정중앙에 정렬하기 위한 설정 */
             display: flex;
             align-items: center;
             justify-content: center;
+            will-change: transform;
         }
 
-        /* 나침반 이미지 크기 제어 */
         #compass-image {
-            /* 화면 세로 크기(vh)의 70% 수준으로 채우기 (원하는 크기에 따라 숫자 조절 가능) */
             width: 60vh;
             height: 60vh;
             object-fit: contain;
-            /* 이미지 비율 유지 */
         }
 
-        /* 📱 모바일 기준 설정 (화면 너비가 768px 이하일 때 적용) */
         @media (max-width: 768px) {
             #compass-image {
-                /* 모바일에서는 세로(vh)가 아닌 화면 가로 너비(vw)의 75% 수준으로 맞춥니다 */
                 width: 75vw;
                 height: 75vw;
                 max-width: 350px;
-                /* 아무리 화면이 커져도 모바일에서 350px은 넘지 않도록 제한 */
             }
 
-            /* 혹시 왼쪽 상단 버튼 패널도 모바일에서 너무 크다면 크기를 약간 줄여줍니다 */
             #control-panel {
                 top: 10px;
                 left: 10px;
@@ -68,7 +56,6 @@
             }
         }
 
-        /* 왼쪽 상단 컨트롤 바 스타일 */
         #control-panel {
             position: absolute;
             top: 20px;
@@ -120,11 +107,6 @@
             <span style="font-size: 13px; font-weight: bold;">나침반:</span>
             <button id="btn-toggle" class="btn active" onclick="toggleCompass()">ON</button>
         </div>
-        <!-- <div class="control-group">
-            <button id="btn-img-a" class="btn active" onclick="changeImage('A', './12animal_red.png')">이미지 A</button>
-            <button id="btn-img-b" class="btn" onclick="changeImage('B', './Luopan_reverse.png')">이미지 B</button>
-            <button id="btn-img-c" class="btn" onclick="changeImage('C', './Luopan.png')">이미지 C</button>
-        </div> -->
     </div>
 
     <div id="compass-container">
@@ -133,8 +115,6 @@
 
     <script>
         let isCompassVisible = true;
-
-        // 1. 누적 연산을 위해 함수 바깥에 전역 변수로 선언해야 값이 유지됩니다.
         let lastHeading = 0;
         let accumulatedRotation = 0;
 
@@ -145,13 +125,12 @@
                     zoom: 16,
                     heading: 0,
                     tilt: 0,
-                    mapId: "c4dd249fc63589dbebea6272" // 발급받은 벡터 전용 Map ID 입력
+                    mapId: "c4dd249fc63589dbebea6272"
                 });
 
                 const compassContainer = document.getElementById("compass-container");
 
                 map.addListener("heading_changed", () => {
-                    // 변수명을 currentHeading으로 통일하여 아래 계산식과 매칭합니다.
                     const currentHeading = map.getHeading() || 0;
                     let diff = currentHeading - lastHeading;
 
@@ -161,19 +140,16 @@
                         diff += 360;
                     }
 
-                    // 지도의 움직임 그대로 플러스(+) 누적 계산
                     accumulatedRotation += diff;
                     lastHeading = currentHeading;
 
-                    // 최종 출력할 때만 음수(-)를 적용하여 회전 방향 일치
-                    compassContainer.style.transform = `translate(-50%, -50%) rotate(${-accumulatedRotation}deg)`;
+                    compassContainer.style.transform = `rotate(${-accumulatedRotation}deg)`;
                 });
             } catch (error) {
                 console.error("지도를 초기화하는 중 오류 발생:", error);
             }
         }
 
-        // 나침반 표시/숨김 토글 함수
         function toggleCompass() {
             const container = document.getElementById("compass-container");
             const btn = document.getElementById("btn-toggle");
@@ -189,23 +165,6 @@
                 btn.innerText = "OFF";
                 btn.classList.remove("active");
             }
-        }
-
-        // 나침반 이미지 변경 함수
-        function changeImage(type, imagePath) {
-            const imgElement = document.getElementById("compass-image");
-            imgElement.src = imagePath;
-
-            // 버튼 활성화 스타일 시각화 처리
-            const buttons = ['A', 'B', 'C'];
-            buttons.forEach(b => {
-                const targetBtn = document.getElementById(`btn-img-${b.toLowerCase()}`);
-                if (b === type) {
-                    targetBtn.classList.add("active");
-                } else {
-                    targetBtn.classList.remove("active");
-                }
-            });
         }
     </script>
 
