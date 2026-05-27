@@ -199,7 +199,7 @@
             const API_KEYS = {
                 google: 'AIzaSyC65x514y9qD8MdeG4T7B4HDHkxx3W2xpI',
                 kakao: '055d4b8b3cb0b58f3b935987a9014050',
-                naver: 'wMH8n4fB2A4aV4vW9M2B8J5IlkPIkEoMyTJlqhRc'
+                naver: 'js6rffapvx'
             };
             const GOOGLE_MAP_ID = 'c4dd249fc63589dbebea6272';
             const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 };
@@ -355,8 +355,11 @@
                             }
                         });
                 } else if (provider === 'naver') {
-                    loadScript('https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' +
-                        encodeURIComponent(API_KEYS.naver), () => {
+                    // NCP 신규 키는 ncpKeyId, 구버전은 ncpClientId 사용
+                    // 둘 중 하나만 보내도 정상 키면 작동하지만 호환을 위해 둘 다 전송
+                    const naverKey = encodeURIComponent(API_KEYS.naver);
+                    loadScript('https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' +
+                        naverKey + '&ncpClientId=' + naverKey, () => {
                             state.sdkReady.naver = true;
                             if (state.pendingProvider === 'naver') {
                                 state.pendingProvider = null;
@@ -376,3 +379,4 @@
 </body>
 
 </html>
+
