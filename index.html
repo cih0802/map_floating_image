@@ -4,30 +4,97 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>구글 지도 화면 고정 나침반</title>
+    <title>풍수 나침반 지도 서비스</title>
     <style>
         html,
-        body,
-        #map {
+        body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 1. 메인 화면 */
+        #main-screen {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .ui-section {
+            margin-bottom: 25px;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .ui-section h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .radio-label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .main-btn:hover {
+            background-color: #357ae8;
+        }
+
+        .main-btn:focus-visible,
+        .nav-btn:focus-visible {
+            outline: 3px solid #1a56c4;
+            outline-offset: 2px;
+        }
+
+        /* 2. 지도 화면 */
+        #map-screen {
             width: 100%;
             height: 100%;
             position: relative;
         }
 
-        #compass-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 10;
-            pointer-events: none;
+        .map-layer {
             width: 100%;
             height: 100%;
+        }
+
+        .map-layer.hidden {
+            display: none;
+        }
+
+        /* 화면 중앙 나침반 */
+        #compass-container {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
             display: flex;
             align-items: center;
             justify-content: center;
             will-change: transform;
+            transition: transform 0.1s linear;
+        }
+
+        #compass-container.hidden {
+            display: none;
         }
 
         #compass-image {
@@ -42,135 +109,270 @@
                 height: 75vw;
                 max-width: 350px;
             }
-
-            #control-panel {
-                top: 10px;
-                left: 10px;
-                padding: 8px;
-                gap: 6px;
-            }
-
-            .btn {
-                padding: 4px 8px;
-                font-size: 11px;
-            }
         }
 
-        #control-panel {
+        /* 우측 상단 컨트롤 */
+        .control-group {
             position: absolute;
             top: 20px;
-            left: 20px;
-            z-index: 20;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            font-family: Arial, sans-serif;
+            right: 20px;
+            z-index: 30;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn {
-            padding: 6px 12px;
-            background-color: #fff;
+        .nav-btn {
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.9);
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            text-align: center;
         }
 
-        .btn:hover {
-            background-color: #f0f0f0;
+        .nav-btn:hover {
+            background: #f0f0f0;
         }
 
-        .btn.active {
+        .nav-btn.active {
             background-color: #4285F4;
-            color: #fff;
+            color: white;
             border-color: #4285F4;
+        }
+
+        .map-placeholder {
+            padding: 20px;
+            color: white;
+            background: black;
+            height: 100%;
+            box-sizing: border-box;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="map"></div>
+    <main id="main-screen">
+        <h2>🧭 나침반 지도 시스템</h2>
 
-    <div id="control-panel">
+        <section class="ui-section">
+            <h3>1. 기반 지도 선택</h3>
+            <label class="radio-label"><input type="radio" name="map-provider" value="google" checked> 구글 지도 (회전 지원)</label>
+            <label class="radio-label"><input type="radio" name="map-provider" value="naver"> 네이버 지도 (회전 미지원)</label>
+            <label class="radio-label"><input type="radio" name="map-provider" value="kakao"> 카카오 지도 (회전 미지원)</label>
+        </section>
+
+        <section class="ui-section">
+            <h3>2. 나침반 디자인 선택</h3>
+            <label class="radio-label"><input type="radio" name="compass-design" value="./luopan_brown.png" checked> 나침반1</label>
+            <label class="radio-label"><input type="radio" name="compass-design" value="./12animal_red.png"> 나침반2</label>
+            <label class="radio-label"><input type="radio" name="compass-design" value="./Luopan_reverse.png"> 나침반3</label>
+        </section>
+
+        <button id="btn-open-map" class="main-btn" type="button">지도 및 나침반 띄우기</button>
+    </main>
+
+    <section id="map-screen" style="display: none;" aria-label="지도 및 나침반 화면">
         <div class="control-group">
-            <span style="font-size: 13px; font-weight: bold;">나침반:</span>
-            <button id="btn-toggle" class="btn active" onclick="toggleCompass()">ON</button>
+            <button id="btn-toggle" class="nav-btn active" type="button" aria-pressed="true">나침반 ON</button>
+            <button id="btn-go-main" class="nav-btn" type="button">메인으로 돌아가기</button>
         </div>
-    </div>
 
-    <div id="compass-container">
-        <img id="compass-image" src="./luopan_brown.png" alt="Compass">
-    </div>
+        <div id="map-google" class="map-layer hidden"></div>
+        <div id="map-naver" class="map-layer hidden"></div>
+        <div id="map-kakao" class="map-layer hidden"></div>
+
+        <div id="compass-container">
+            <img id="compass-image" src="" alt="풍수 나침반">
+        </div>
+    </section>
 
     <script>
-        let isCompassVisible = true;
-        let lastHeading = 0;
-        let accumulatedRotation = 0;
+        (function () {
+            'use strict';
 
-        function startCompassMap() {
-            try {
-                const map = new google.maps.Map(document.getElementById("map"), {
-                    center: { lat: 37.5665, lng: 126.9780 },
-                    zoom: 16,
-                    heading: 0,
-                    tilt: 0,
-                    mapId: "c4dd249fc63589dbebea6272"
+            // ---- API 키 (실제 사용 시 교체; 비어있으면 SDK 로드 생략) ----
+            const API_KEYS = {
+                google: 'AIzaSyC65x514y9qD8MdeG4T7B4HDHkxx3W2xpI',
+                kakao: '055d4b8b3cb0b58f3b935987a9014050',
+                naver: 'wMH8n4fB2A4aV4vW9M2B8J5IlkPIkEoMyTJlqhRc'
+            };
+            const GOOGLE_MAP_ID = 'c4dd249fc63589dbebea6272';
+            const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 };
+
+            // ---- 상태 ----
+            const state = {
+                mapObjects: { google: null, naver: null, kakao: null },
+                lastHeading: 0,
+                accumulatedRotation: 0,
+                isCompassVisible: true,
+                sdkReady: { google: false, naver: false, kakao: false },
+                sdkLoading: { google: false, naver: false, kakao: false },
+                pendingProvider: null
+            };
+
+            // ---- DOM ----
+            const els = {
+                main: document.getElementById('main-screen'),
+                map: document.getElementById('map-screen'),
+                compassContainer: document.getElementById('compass-container'),
+                compassImage: document.getElementById('compass-image'),
+                btnToggle: document.getElementById('btn-toggle'),
+                btnOpenMap: document.getElementById('btn-open-map'),
+                btnGoMain: document.getElementById('btn-go-main')
+            };
+
+            function applyRotation() {
+                els.compassContainer.style.transform = 'rotate(' + (-state.accumulatedRotation) + 'deg)';
+            }
+
+            function openMap() {
+                const provider = document.querySelector('input[name="map-provider"]:checked').value;
+                const compassSrc = document.querySelector('input[name="compass-design"]:checked').value;
+
+                els.main.style.display = 'none';
+                els.map.style.display = 'block';
+                els.compassImage.src = compassSrc;
+
+                state.isCompassVisible = true;
+                els.compassContainer.classList.remove('hidden');
+                els.btnToggle.innerText = '나침반 ON';
+                els.btnToggle.classList.add('active');
+                els.btnToggle.setAttribute('aria-pressed', 'true');
+                applyRotation();
+
+                ['google', 'naver', 'kakao'].forEach(p => {
+                    document.getElementById('map-' + p).classList.toggle('hidden', p !== provider);
                 });
 
-                const compassContainer = document.getElementById("compass-container");
+                initTargetMap(provider);
+            }
 
-                map.addListener("heading_changed", () => {
-                    const currentHeading = map.getHeading() || 0;
-                    let diff = currentHeading - lastHeading;
+            function goMain() {
+                els.map.style.display = 'none';
+                els.main.style.display = 'block';
+            }
 
-                    if (diff > 180) {
-                        diff -= 360;
-                    } else if (diff < -180) {
-                        diff += 360;
+            function toggleCompass() {
+                state.isCompassVisible = !state.isCompassVisible;
+                els.compassContainer.classList.toggle('hidden', !state.isCompassVisible);
+                els.btnToggle.innerText = state.isCompassVisible ? '나침반 ON' : '나침반 OFF';
+                els.btnToggle.classList.toggle('active', state.isCompassVisible);
+                els.btnToggle.setAttribute('aria-pressed', String(state.isCompassVisible));
+            }
+
+            function initTargetMap(provider) {
+                if (state.mapObjects[provider]) return;
+
+                if (provider === 'google') {
+                    if (!ensureSdk('google')) {
+                        state.pendingProvider = 'google';
+                        return;
                     }
+                    state.mapObjects.google = new google.maps.Map(document.getElementById('map-google'), {
+                        center: DEFAULT_CENTER,
+                        zoom: 16,
+                        heading: 0,
+                        tilt: 0,
+                        mapId: GOOGLE_MAP_ID
+                    });
 
-                    accumulatedRotation += diff;
-                    lastHeading = currentHeading;
-
-                    compassContainer.style.transform = `rotate(${-accumulatedRotation}deg)`;
-                });
-            } catch (error) {
-                console.error("지도를 초기화하는 중 오류 발생:", error);
+                    state.mapObjects.google.addListener('heading_changed', () => {
+                        const currentHeading = state.mapObjects.google.getHeading() || 0;
+                        let diff = currentHeading - state.lastHeading;
+                        if (diff > 180) diff -= 360;
+                        else if (diff < -180) diff += 360;
+                        state.accumulatedRotation += diff;
+                        state.lastHeading = currentHeading;
+                        applyRotation();
+                    });
+                } else if (provider === 'naver') {
+                    if (!ensureSdk('naver')) {
+                        state.pendingProvider = 'naver';
+                        return;
+                    }
+                    state.mapObjects.naver = new naver.maps.Map('map-naver', {
+                        center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+                        zoom: 16
+                    });
+                } else if (provider === 'kakao') {
+                    if (!ensureSdk('kakao')) {
+                        state.pendingProvider = 'kakao';
+                        return;
+                    }
+                    kakao.maps.load(() => {
+                        state.mapObjects.kakao = new kakao.maps.Map(document.getElementById('map-kakao'), {
+                            center: new kakao.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+                            level: 3
+                        });
+                    });
+                }
             }
-        }
 
-        function toggleCompass() {
-            const container = document.getElementById("compass-container");
-            const btn = document.getElementById("btn-toggle");
+            // 구글 SDK 콜백
+            window.startCompassMap = function () {
+                state.sdkReady.google = true;
+                if (state.pendingProvider === 'google') {
+                    state.pendingProvider = null;
+                    initTargetMap('google');
+                }
+            };
 
-            isCompassVisible = !isCompassVisible;
-
-            if (isCompassVisible) {
-                container.style.display = "flex";
-                btn.innerText = "ON";
-                btn.classList.add("active");
-            } else {
-                container.style.display = "none";
-                btn.innerText = "OFF";
-                btn.classList.remove("active");
+            // 동적 SDK 로딩 (지연 로딩)
+            function loadScript(src, onload) {
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = true;
+                s.defer = true;
+                if (onload) s.onload = onload;
+                document.head.appendChild(s);
             }
-        }
+
+            function ensureSdk(provider) {
+                if (state.sdkReady[provider]) return true;
+                if (state.sdkLoading[provider]) return false;
+                if (!API_KEYS[provider]) {
+                    document.getElementById('map-' + provider).innerHTML =
+                        '<div class="map-placeholder">' + provider + ' API 키가 설정되지 않았습니다.</div>';
+                    return false;
+                }
+                state.sdkLoading[provider] = true;
+
+                if (provider === 'google') {
+                    loadScript('https://maps.googleapis.com/maps/api/js?key=' +
+                        encodeURIComponent(API_KEYS.google) + '&callback=startCompassMap&loading=async');
+                } else if (provider === 'kakao') {
+                    loadScript('https://dapi.kakao.com/v2/maps/sdk.js?appkey=' +
+                        encodeURIComponent(API_KEYS.kakao) + '&autoload=false', () => {
+                            state.sdkReady.kakao = true;
+                            if (state.pendingProvider === 'kakao') {
+                                state.pendingProvider = null;
+                                initTargetMap('kakao');
+                            }
+                        });
+                } else if (provider === 'naver') {
+                    loadScript('https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' +
+                        encodeURIComponent(API_KEYS.naver), () => {
+                            state.sdkReady.naver = true;
+                            if (state.pendingProvider === 'naver') {
+                                state.pendingProvider = null;
+                                initTargetMap('naver');
+                            }
+                        });
+                }
+                return false;
+            }
+
+            // 이벤트 바인딩
+            els.btnOpenMap.addEventListener('click', openMap);
+            els.btnGoMain.addEventListener('click', goMain);
+            els.btnToggle.addEventListener('click', toggleCompass);
+        })();
     </script>
-
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC65x514y9qD8MdeG4T7B4HDHkxx3W2xpI&callback=startCompassMap&loading=async"
-        async defer></script>
 </body>
 
 </html>
